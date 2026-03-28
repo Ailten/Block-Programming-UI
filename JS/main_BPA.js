@@ -19,7 +19,7 @@ window.addEventListener('load', () => {
 // function to create the BPA (from the div).
 function buildBPA(div) {
     buildMenu(div);
-
+    addToMenu('start');
 }
 
 // function to create the menu of BPA.
@@ -29,5 +29,17 @@ function buildMenu(div) {
 }
 
 
-// ---------->> OBJ node.
+// ---------->> block ref node.
 
+const blockType = {  // fixme : make class with parent abstract.
+    'start': {
+        createBlock: () => {
+
+        }
+    },
+    'if': {
+        createBlock: () => {
+            
+        }
+    }
+};
