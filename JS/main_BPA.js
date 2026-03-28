@@ -33,12 +33,12 @@ function buildMenu(div) {
 
 const blockType = {  // fixme : make class with parent abstract.
     'start': {
-        createBlock: () => {
+        createBlock: (divDest) => {
 
         }
     },
     'if': {
-        createBlock: () => {
+        createBlock: (divDest) => {
             
         }
     }
