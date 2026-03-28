@@ -1,4 +1,13 @@
 
 div.block-programming-ui {
+
     background-color: rgb(212, 212, 212);
+
+    & div.menu-block {
+        width: 25%;
+        height: 100%;
+        background-color: rgba(0,0,0, 0.1);
+    }
+
 }
+
