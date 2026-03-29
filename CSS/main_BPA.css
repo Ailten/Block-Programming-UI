@@ -2,11 +2,31 @@
 div.block-programming-ui {
 
     background-color: rgb(212, 212, 212);
+    overflow: hidden;
+    font-family: "Lucida Console", "Courier New", monospace;
 
     & div.menu-block {
         width: 25%;
         height: 100%;
         background-color: rgba(0,0,0, 0.1);
+        overflow-y: scroll;
+
+        & div.garbage {
+            margin: 1.5vh;
+            height: 8vh;
+            border: 3px dashed #c072ff;
+            color: #c072ff;
+            font-size: 1.6em;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    }
+
+    & div.block {
+        position: absolute;
+        cursor: grab;
     }
 
 }
