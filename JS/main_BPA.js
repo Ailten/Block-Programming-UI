@@ -86,6 +86,7 @@ class Block {
         block.classList.add('block');
         block.addEventListener('pointerdown', this.pointerDown);
         block.addEventListener('pointermove', this.pointerMove);
+        block.addEventListener('mouseleave', this.mouseLeave);
         block.addEventListener('pointerdown', this.pointerUp);
         return block;
     }
@@ -119,7 +120,6 @@ class Block {
             let blockType = evnt.target.getAttribute('block-type');
             let block = canvas.appendChild(BlockType[blockType].createElement());
             block.setAttribute('grab-on', 'true');
-            block.setAttribute('follow-mouse', 'true');
             let posY = evnt.y - evnt.target.clientHeight * 0.5;  // set pos.
             let posX = evnt.x - evnt.target.clientWidth * 0.5;
             block.style.top = `${posY}px`;
@@ -139,7 +139,7 @@ class Block {
 
     }
     static pointerMove(evnt) {
-        if(!evnt.target.hasAttribute('follow-mouse'))
+        if(!evnt.target.hasAttribute('grab-on'))
             return;
 
         // set pos.
@@ -149,9 +149,18 @@ class Block {
         evnt.target.style.left = `${posX}px`;
 
     }
+    static mouseLeave(evnt) {
+        if(!evnt.target.hasAttribute('grab-on'))
+            return;
+
+        // call event pointerUp when leave.
+        let blockType = evnt.target.getAttribute('block-type');
+        BlockType[blockType].pointerUp({
+            target: evnt.target
+        });
+    }
     static pointerUp(evnt) {
         evnt.target.removeAttribute('grab-on');
-        evnt.target.removeAttribute('follow-mouse');
 
     }
 }
