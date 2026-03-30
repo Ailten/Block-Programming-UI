@@ -18,15 +18,35 @@ div.block-programming-ui {
             color: #c072ff;
             font-size: 1.6em;
 
-            display: flex;
+            display: flex;  /* center text */
             justify-content: center;
             align-items: center;
+        }
+
+        & div.block {
+            position: relative;
+            width: fit-content;
+            margin: 1em auto;
         }
     }
 
     & div.block {
         position: absolute;
         cursor: grab;
+        padding: 0.5em 1.2em;
+        border-radius: 5px;
+        outline: 2px rgba(0,0,0, 0.1) solid;
+
+        display: flex;  /* center text */
+        justify-content: center;
+        align-items: center;
+    }
+    & div.block[grab-on] {
+        cursor: grabbing;
+    }
+
+    & div.block-orange {
+        background-color: rgb(255, 157, 92);
     }
 
 }

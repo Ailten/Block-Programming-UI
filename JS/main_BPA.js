@@ -49,9 +49,11 @@ class BPA {
 
     // function to add block to menu.
     addBlockToMenu(classBlock) {
-
-        //let block = this.menu.appendChild(document.createElement('div'));
-
+    
+        let blockContainer = this.menu.appendChild(document.createElement('div'));
+        let block = blockContainer.appendChild(classBlock.createElement());
+        block.setAttribute('is-in-menu', 'true');
+        
     }
 }
 
@@ -59,17 +61,42 @@ class BPA {
 // ---------- Block.
 
 class Block {
-    pos;
+    constructor() {
+    }
 
-    constructor(pos) {
-        this.pos = pos;
+    static createElement() {
+        let block = document.createElement('div');
+        block.classList.add('block');
+        block.addEventListener('pointerdown', this.pointerDown);
+        block.addEventListener('pointerdown', this.pointerUp);
+        return block;
+    }
+
+    // event.
+    static pointerDown(evnt) {
+        evnt.target.setAttribute('grab-on', 'true');
+
+        let isInMenu = evnt.target.hasAttribute('is-in-menu');
+        if(isInMenu) {  // create a new block (from menu).
+
+        }
+    }
+    static pointerUp(evnt) {
+        evnt.target.removeAttribute('grab-on');
+
     }
 }
 
 class BlockStart extends Block {
     constructor() {
-        super([0, 0]);
-        
+        super();
+    }
+
+    static createElement() {
+        let block = super.createElement();
+        block.classList.add('block-start', 'block-orange');
+        block.innerText = 'start';
+        return block;
     }
 }
 
