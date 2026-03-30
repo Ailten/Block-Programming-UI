@@ -43,6 +43,10 @@ div.block-programming-ui {
         display: flex;  /* center text */
         justify-content: center;
         align-items: center;
+
+        -webkit-user-select: none; /* Safari */  /* disable text selection */
+        -ms-user-select: none; /* IE 10 and IE 11 */
+        user-select: none; /* Standard syntax */
     }
     & div.block[grab-on] {
         cursor: grabbing;

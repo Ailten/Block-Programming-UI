@@ -32,6 +32,22 @@ class BPA {
         this.bpaDiv = div;
         this.menu = this.#createMenu();
         this.garbage = this.#createGarbage();
+
+        // event for mouse up block.
+        this.bpaDiv.addEventListener('pointerup', (evnt) => {
+            let isNeedRedirectEvent = (
+                evnt.target.classList.contains('block') &&
+                evnt.target.hasAttribute('grab-on') &&
+                evnt.target.hasAttribute('event-down-manually')
+            );
+            if(isNeedRedirectEvent) {
+                evnt.target.removeAttribute('event-down-manually');
+                let blockType = evnt.target.getAttribute('block-type');
+                BlockType[blockType].pointerUp({
+                    target: evnt.target,
+                });
+            }
+        });
     }
 
     // create menu (div).
@@ -91,6 +107,10 @@ class Block {
         if(evnt.button !== 0)  // skip if it's not left click.
             return;
 
+        if(evnt.isExecutedManually !== undefined){
+            evnt.target.setAttribute('event-down-manually', 'true');
+        }
+
         let isInMenu = evnt.target.hasAttribute('is-in-menu');
         if(isInMenu) { 
 
@@ -104,6 +124,13 @@ class Block {
             let posX = evnt.x - evnt.target.clientWidth * 0.5;
             block.style.top = `${posY}px`;
             block.style.left = `${posX}px`;
+            BlockType[blockType].pointerDown({  // call mousedown event manually.
+                target: block,
+                button: evnt.button,
+                y: evnt.y,
+                x: evnt.x,
+                isExecutedManually: true,
+            });
 
             return;
         }
