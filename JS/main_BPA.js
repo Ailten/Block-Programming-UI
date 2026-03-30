@@ -69,6 +69,7 @@ class Block {
         let block = document.createElement('div');
         block.classList.add('block');
         block.addEventListener('pointerdown', this.pointerDown);
+        block.addEventListener('pointermove', this.pointerMove);
         block.addEventListener('pointerdown', this.pointerUp);
         return block;
     }
@@ -97,6 +98,8 @@ class Block {
             let canvas = Block.getCanvas(evnt.target);
             let blockType = evnt.target.getAttribute('block-type');
             let block = canvas.appendChild(BlockType[blockType].createElement());
+            block.setAttribute('grab-on', 'true');
+            block.setAttribute('follow-mouse', 'true');
             let posY = evnt.y - evnt.target.clientHeight * 0.5;  // set pos.
             let posX = evnt.x - evnt.target.clientWidth * 0.5;
             block.style.top = `${posY}px`;
@@ -108,11 +111,22 @@ class Block {
         evnt.target.setAttribute('grab-on', 'true');
 
     }
-    static pointerUp(evnt) {
-        evnt.target.removeAttribute('grab-on');
+    static pointerMove(evnt) {
+        if(!evnt.target.hasAttribute('follow-mouse'))
+            return;
+
+        // set pos.
+        let posY = evnt.clientY - evnt.target.clientHeight * 0.5;
+        let posX = evnt.clientX - evnt.target.clientWidth * 0.5;
+        evnt.target.style.top = `${posY}px`;
+        evnt.target.style.left = `${posX}px`;
 
     }
-    // todo : event pointermove
+    static pointerUp(evnt) {
+        evnt.target.removeAttribute('grab-on');
+        evnt.target.removeAttribute('follow-mouse');
+
+    }
 }
 
 class BlockStart extends Block {
@@ -132,3 +146,8 @@ class BlockStart extends Block {
 const BlockType = {
     'BlockStart': BlockStart,
 };
+
+
+// todo: 
+// - allow to re-move a block instantiate.
+// - allow to erase a block instantiate.
