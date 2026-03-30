@@ -55,6 +55,7 @@ class BPA {
         block.setAttribute('is-in-menu', 'true');
         
     }
+
 }
 
 
@@ -71,20 +72,47 @@ class Block {
         block.addEventListener('pointerdown', this.pointerUp);
         return block;
     }
+    static getMenu(dom) {
+        while(!dom.classList.contains('menu-block')){
+            dom = dom.parentNode;
+        }
+        return dom;
+    }
+    static getCanvas(dom) {
+        while(!dom.classList.contains('block-programming-ui')){
+            dom = dom.parentNode;
+        }
+        return dom;
+    }
 
     // event.
     static pointerDown(evnt) {
-        evnt.target.setAttribute('grab-on', 'true');
+        if(evnt.button !== 0)  // skip if it's not left click.
+            return;
 
         let isInMenu = evnt.target.hasAttribute('is-in-menu');
-        if(isInMenu) {  // create a new block (from menu).
+        if(isInMenu) { 
 
+            // create a new block (from menu).
+            let canvas = Block.getCanvas(evnt.target);
+            let blockType = evnt.target.getAttribute('block-type');
+            let block = canvas.appendChild(BlockType[blockType].createElement());
+            let posY = evnt.y - evnt.target.clientHeight * 0.5;  // set pos.
+            let posX = evnt.x - evnt.target.clientWidth * 0.5;
+            block.style.top = `${posY}px`;
+            block.style.left = `${posX}px`;
+
+            return;
         }
+
+        evnt.target.setAttribute('grab-on', 'true');
+
     }
     static pointerUp(evnt) {
         evnt.target.removeAttribute('grab-on');
 
     }
+    // todo : event pointermove
 }
 
 class BlockStart extends Block {
@@ -94,11 +122,13 @@ class BlockStart extends Block {
 
     static createElement() {
         let block = super.createElement();
-        block.classList.add('block-start', 'block-orange');
+        block.classList.add('block-orange');
+        block.setAttribute('block-type', 'BlockStart');
         block.innerText = 'start';
         return block;
     }
 }
 
-
-// events : pointerdown, pointermove, pointerup.
+const BlockType = {
+    'BlockStart': BlockStart,
+};
