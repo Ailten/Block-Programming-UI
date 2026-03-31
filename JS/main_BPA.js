@@ -45,6 +45,7 @@ class BPA {
                 let blockType = evnt.target.getAttribute('block-type');
                 BlockType[blockType].pointerUp({
                     target: evnt.target,
+                    isExecutedManually: true,
                 });
             }
         });
@@ -87,7 +88,7 @@ class Block {
         block.addEventListener('pointerdown', this.pointerDown);
         block.addEventListener('pointermove', this.pointerMove);
         block.addEventListener('mouseleave', this.mouseLeave);
-        block.addEventListener('pointerdown', this.pointerUp);
+        block.addEventListener('pointerup', this.pointerUp);
         return block;
     }
     static getMenu(dom) {
@@ -161,6 +162,7 @@ class Block {
     }
     static pointerUp(evnt) {
         evnt.target.removeAttribute('grab-on');
+        evnt.target.removeAttribute('event-down-manually');
 
     }
 }
