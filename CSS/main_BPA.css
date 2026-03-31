@@ -50,6 +50,8 @@ div.block-programming-ui {
     }
     & div.block[grab-on] {
         cursor: grabbing;
+        opacity: 0.6;
+        box-shadow: -2px 2px 4px rgba(0,0,0, 0.4);
     }
 
     & div.block-orange {

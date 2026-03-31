@@ -188,3 +188,4 @@ const BlockType = {
 
 // todo: 
 // - allow to erase a block instantiate. (using drag n drop event ?)
+// (drag, dragend, dragenter, dragleave, dragover, dragstart, drop)
