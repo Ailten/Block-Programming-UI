@@ -88,7 +88,7 @@ class Block {
         block.classList.add('block');
         block.addEventListener('pointerdown', this.pointerDown);
         block.addEventListener('pointermove', this.pointerMove);
-        block.addEventListener('mouseleave', this.mouseLeave);
+        block.addEventListener('pointerleave', this.pointerLeave);
         block.addEventListener('pointerup', this.pointerUp);
         return block;
     }
@@ -151,7 +151,7 @@ class Block {
         evnt.target.style.left = `${posX}px`;
 
     }
-    static mouseLeave(evnt) {
+    static pointerLeave(evnt) {
         if(!evnt.target.hasAttribute('grab-on'))
             return;
 
@@ -183,6 +183,12 @@ class BlockStart extends Block {
 }
 
 class BlockAction extends Block {
+    static actionDico = [
+        {value: '1', libele: 'atk.'},
+        {value: '2', libele: 'def.'},
+        {value: '3', libele: 'soin'},
+    ];
+
     constructor() {
         super();
     }
@@ -191,17 +197,11 @@ class BlockAction extends Block {
         let block = super.createElement();
         block.classList.add('block-blue');
         block.setAttribute('block-type', 'BlockAction');
-        let libele = block.appendChild(document.createElement('span'));
-        libele.innerText = 'action';
+        block.innerText = 'action';
 
         // add select.
-        let dico = [
-            {value: '1', libele: 'attaque'},
-            {value: '2', libele: 'defence'},
-            {value: '3', libele: 'soin'},
-        ];
         let select = block.appendChild(document.createElement('select'));
-        dico.forEach(e => {
+        this.actionDico.forEach(e => {
             let option = select.appendChild(document.createElement('option'));
             option.setAttribute('value', e.value);
             option.innerText = e.libele;
