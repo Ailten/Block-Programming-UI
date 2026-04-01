@@ -60,7 +60,7 @@ class BPA {
     }
     #createGarbage() {
         let garbage = this.menu.appendChild(document.createElement('div'));
-        garbage.classList.add('garbage');
+        garbage.classList.add('garbage', 'drop-on');
         garbage.innerText = "poubelle";
         return garbage;
     }
@@ -85,7 +85,7 @@ class Block {
 
     static createElement() {
         let block = document.createElement('div');
-        block.classList.add('block');
+        block.classList.add('block', 'drop-on');
         block.addEventListener('pointerdown', this.pointerDown);
         block.addEventListener('pointermove', this.pointerMove);
         block.addEventListener('pointerleave', this.pointerLeave);
@@ -103,6 +103,10 @@ class Block {
             dom = dom.parentNode;
         }
         return dom;
+    }
+
+    static isCanHaveDrop(isTryDropOnTop) {
+        return true;
     }
 
     // event.
@@ -169,15 +173,56 @@ class Block {
         if(evnt.isExecutedManually !== undefined)
             return;
 
-        console.log(evnt)
-        console.log(evnt.clientX)
-        console.log(evnt.clientY)
-        console.log(document.elementFromPoint(evnt.clientX, evnt.clientY));
-        console.log(document.elementFromPoint(evnt.clientX, evnt.clientY).closest('div'));  
+        // find block 'drop-on' behind.
+        let elementBehind = document.elementsFromPoint(evnt.clientX, evnt.clientY)
+            .filter(e => e !== evnt.target)  // skip them self.
+            .filter(e => !e.hasAttribute('is-in-menu'))  // skip menu-block.
+            .find(e => e.classList.contains('drop-on'));  // maybe use a drop-on attribute with value priority.
+        if(elementBehind === undefined)
+            return;
 
-        // disable pointer-events: none during the "scan". (not use closest).
+        // garbage erase block.
+        if(elementBehind.classList.contains('garbage')){
+            evnt.target.classList.add('delete-pop-scale');
+            evnt.target.addEventListener('animationend', evnt => {
+                evnt.target.parentNode.removeChild(evnt.target);
+            });
+            return;
+        }
 
-        // getBoundingClientRect();
+        // verify if can be drop.
+        let isDropOnTop = (evnt.clientY < elementBehind.clientY + elementBehind.clientHeight * 0.5);
+        let blockType = BlockType[elementBehind.getAttribute('block-type')];
+        let isDropOnValid = blockType.isCanHaveDrop(isDropOnTop);
+        if(!isDropOnValid)
+            return;
+
+        // get (or create) block containers for block list.
+        let blockContainer = elementBehind.parentElement;
+        if(!blockContainer.classList.contains('block-list')){
+            let divContainer = blockContainer.appendChild(document.createElement('div'));
+            let blockClone = elementBehind.cloneNode(true);
+            blockContainer.removeChild(elementBehind);
+            blockContainer = divContainer;
+            elementBehind = blockClone;
+            blockContainer.appendChild(elementBehind);
+            blockContainer.classList.add('block-list');
+            blockContainer.style.top = elementBehind.style.top;
+            blockContainer.style.left = elementBehind.style.left;
+            elementBehind.style.top = '0px';
+            elementBehind.style.left = '0px';
+        }
+
+        // move target in the block list.
+        let target = evnt.target.cloneNode(true);
+        if(isDropOnTop){
+            blockContainer.insertBefore(target, elementBehind);
+        } else {
+            blockContainer.insertBefore(target, elementBehind.nextSibling);  // fake insertAfter.
+        }
+        evnt.target.parentNode.removeChild(evnt.target);
+        target.style.top = '0px';
+        target.style.left = '0px';
 
     }
 }
@@ -193,6 +238,12 @@ class BlockStart extends Block {
         block.setAttribute('block-type', 'BlockStart');
         block.innerText = 'start';
         return block;
+    }
+
+    static isCanHaveDrop(isTryDropOnTop) {
+        if(isTryDropOnTop)
+            return false;
+        return true;
     }
 }
 
@@ -232,5 +283,7 @@ const BlockType = {
 
 
 // todo: 
-// - allow to erase a block instantiate. (using drag n drop event ?)
-// (drag, dragend, dragenter, dragleave, dragover, dragstart, drop)
+// actually, isCantConnect on start block not working.
+// block when try to place a block "start" behind a block "action" (permission verify).
+// can't re-move a block connected in a list.
+// can't move a list of block.
