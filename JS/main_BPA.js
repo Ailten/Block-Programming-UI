@@ -14,6 +14,7 @@ window.addEventListener('load', () => {
 
             // define what block allow.
             myBpa.addBlockToMenu(BlockStart);
+            myBpa.addBlockToMenu(BlockAction);
 
     });
 
@@ -181,8 +182,38 @@ class BlockStart extends Block {
     }
 }
 
+class BlockAction extends Block {
+    constructor() {
+        super();
+    }
+
+    static createElement() {
+        let block = super.createElement();
+        block.classList.add('block-blue');
+        block.setAttribute('block-type', 'BlockAction');
+        let libele = block.appendChild(document.createElement('span'));
+        libele.innerText = 'action';
+
+        // add select.
+        let dico = [
+            {value: '1', libele: 'attaque'},
+            {value: '2', libele: 'defence'},
+            {value: '3', libele: 'soin'},
+        ];
+        let select = block.appendChild(document.createElement('select'));
+        dico.forEach(e => {
+            let option = select.appendChild(document.createElement('option'));
+            option.setAttribute('value', e.value);
+            option.innerText = e.libele;
+        })
+
+        return block;
+    }
+}
+
 const BlockType = {
     'BlockStart': BlockStart,
+    'BlockAction': BlockAction
 };
 
 

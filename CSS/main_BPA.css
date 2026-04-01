@@ -47,6 +47,10 @@ div.block-programming-ui {
         -webkit-user-select: none; /* Safari */  /* disable text selection */
         -ms-user-select: none; /* IE 10 and IE 11 */
         user-select: none; /* Standard syntax */
+
+        & *:nth-child(n+2) {
+            margin-left: 8px;
+        }
     }
     & div.block[grab-on] {
         cursor: grabbing;
@@ -56,6 +60,9 @@ div.block-programming-ui {
 
     & div.block-orange {
         background-color: rgb(255, 157, 92);
+    }
+    & div.block-blue {
+        background-color: rgb(73, 214, 233);
     }
 
 }
