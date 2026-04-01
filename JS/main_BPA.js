@@ -158,12 +158,26 @@ class Block {
         // call event pointerUp when leave.
         let blockType = evnt.target.getAttribute('block-type');
         BlockType[blockType].pointerUp({
-            target: evnt.target
+            target: evnt.target,
+            isExecutedManually: true
         });
     }
     static pointerUp(evnt) {
         evnt.target.removeAttribute('grab-on');
         evnt.target.removeAttribute('event-down-manually');
+
+        if(evnt.isExecutedManually !== undefined)
+            return;
+
+        console.log(evnt)
+        console.log(evnt.clientX)
+        console.log(evnt.clientY)
+        console.log(document.elementFromPoint(evnt.clientX, evnt.clientY));
+        console.log(document.elementFromPoint(evnt.clientX, evnt.clientY).closest('div'));  
+
+        // disable pointer-events: none during the "scan". (not use closest).
+
+        // getBoundingClientRect();
 
     }
 }
