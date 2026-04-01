@@ -105,7 +105,7 @@ class Block {
         return dom;
     }
 
-    static isCanHaveDrop(isTryDropOnTop) {
+    static isCanBeConnected() {
         return true;
     }
 
@@ -191,10 +191,9 @@ class Block {
         }
 
         // verify if can be drop.
-        let isDropOnTop = (evnt.clientY < elementBehind.clientY + elementBehind.clientHeight * 0.5);
-        let blockType = BlockType[elementBehind.getAttribute('block-type')];
-        let isDropOnValid = blockType.isCanHaveDrop(isDropOnTop);
-        if(!isDropOnValid)
+        let isCanBeConnected = BlockType[evnt.target.getAttribute('block-type')].isCanBeConnected();
+        console.log(isCanBeConnected);
+        if(!isCanBeConnected)
             return;
 
         // get (or create) block containers for block list.
@@ -215,11 +214,7 @@ class Block {
 
         // move target in the block list.
         let target = evnt.target.cloneNode(true);
-        if(isDropOnTop){
-            blockContainer.insertBefore(target, elementBehind);
-        } else {
-            blockContainer.insertBefore(target, elementBehind.nextSibling);  // fake insertAfter.
-        }
+        blockContainer.insertBefore(target, elementBehind.nextSibling);  // fake insertAfter.
         evnt.target.parentNode.removeChild(evnt.target);
         target.style.top = '0px';
         target.style.left = '0px';
@@ -240,10 +235,8 @@ class BlockStart extends Block {
         return block;
     }
 
-    static isCanHaveDrop(isTryDropOnTop) {
-        if(isTryDropOnTop)
-            return false;
-        return true;
+    static isCanBeConnected() {
+        return false;
     }
 }
 
