@@ -276,7 +276,5 @@ const BlockType = {
 
 
 // todo: 
-// actually, isCantConnect on start block not working.
-// block when try to place a block "start" behind a block "action" (permission verify).
 // can't re-move a block connected in a list.
 // can't move a list of block.
