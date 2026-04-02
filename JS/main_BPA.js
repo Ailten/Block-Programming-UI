@@ -192,7 +192,6 @@ class Block {
 
         // verify if can be drop.
         let isCanBeConnected = BlockType[evnt.target.getAttribute('block-type')].isCanBeConnected();
-        console.log(isCanBeConnected);
         if(!isCanBeConnected)
             return;
 
@@ -263,6 +262,15 @@ class BlockAction extends Block {
             let option = select.appendChild(document.createElement('option'));
             option.setAttribute('value', e.value);
             option.innerText = e.libele;
+            option.addEventListener('click', evnt => {
+                Array.prototype.forEach.call(
+                    evnt.target.parentElement.getElementsByTagName('option'),
+                    (option) => {
+                        option.removeAttribute('selected');
+                    }
+                )
+                evnt.target.setAttribute('selected', 'true');
+            });
         })
 
         return block;
@@ -276,6 +284,5 @@ const BlockType = {
 
 
 // todo: 
-// when block action is connected into another block, it reset the value of select (need to stay value of select inside the clone) -> andswer maybe use attribute "selected".
 // can't re-move a block connected in a list.
 // can't move a list of block.
