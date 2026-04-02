@@ -276,5 +276,6 @@ const BlockType = {
 
 
 // todo: 
+// when block action is connected into another block, it reset the value of select (need to stay value of select inside the clone) -> andswer maybe use attribute "selected".
 // can't re-move a block connected in a list.
 // can't move a list of block.
