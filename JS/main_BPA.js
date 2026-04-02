@@ -258,10 +258,15 @@ class BlockAction extends Block {
 
         // add select.
         let select = block.appendChild(document.createElement('select'));
-        this.actionDico.forEach(e => {
+        this.actionDico.forEach((e, i) => {
             let option = select.appendChild(document.createElement('option'));
             option.setAttribute('value', e.value);
             option.innerText = e.libele;
+
+            // selected attribute.
+            if(i === 0){
+                option.setAttribute('selected', 'true');
+            }
             option.addEventListener('click', evnt => {
                 Array.prototype.forEach.call(
                     evnt.target.parentElement.getElementsByTagName('option'),
