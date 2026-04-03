@@ -353,8 +353,9 @@ const BlockType = {
 
 
 // todo: 
-// can't re-move a block connected in a list.
-// can't move a list of block.
+// TP block when leave the block with cursor-leave.
+// (?) allow to move a list of block, the all block under (and into) the one grab-on.
+
 
 
 
