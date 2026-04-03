@@ -16,6 +16,7 @@ window.addEventListener('load', () => {
             myBpa.addBlockToMenu(BlockStart);
             myBpa.addBlockToMenu(BlockAction);
             myBpa.addBlockToMenu(BlockIf);
+            myBpa.addBlockToMenu(BlockBoolean);
 
     });
 
@@ -209,6 +210,9 @@ class Block {
 
     }
     static pointerUp(evnt) {
+        if(!evnt.target.classList.contains('block'))
+            return;
+
         evnt.target.removeAttribute('grab-on');
         evnt.target.removeAttribute('event-down-manually');
 
@@ -229,6 +233,17 @@ class Block {
             evnt.target.addEventListener('animationend', evnt => {
                 evnt.target.parentNode.removeChild(evnt.target);
             });
+            return;
+        }
+
+        // value or action block.
+        let blockValue = (
+            elementBehind.classList.contains('value') ? 'value':
+            elementBehind.classList.contains('action') ? 'action':
+            null
+        );
+        if(blockValue !== null){
+
             return;
         }
 
@@ -317,14 +332,14 @@ class BlockAction extends Block {
     }
     static cloneElement(blockRef) {
         let block = super.cloneElement(blockRef);
-        let optionsRef = blockRef.getElementsByTagName('option');
+        let selectRefValue = blockRef.getElementsByTagName('select')[0].value;
         Array.prototype.forEach.call(
             block.getElementsByTagName('option'),
             (option, i) => {
                 if(i === 0){
                     option.removeAttribute('selected');
                 }
-                if(optionsRef[i].hasAttribute('selected')){
+                if(option.getAttribute('value') === selectRefValue){
                     option.setAttribute('selected', 'true');
                 }
                 option.addEventListener('click', this.#eventOptionClick);
@@ -352,17 +367,17 @@ class BlockIf extends Block {
     static createElement() {
         let block = super.createElement();
         block.setAttribute('block-group', 'condition');
-        block.setAttribute('block-type', 'BlockIF');
+        block.setAttribute('block-type', 'BlockIf');
         block.innerText = 'si';
 
         // add condition container.
         let condition = block.appendChild(document.createElement('div'));
-        condition.classList.add('value-container');
+        condition.classList.add('value-container', 'drop-on');
         condition.innerText = 'condition';
 
         // add block-list container.
         let blockContainer = block.appendChild(document.createElement('div'));
-        blockContainer.classList.add('block-container');
+        blockContainer.classList.add('block-container', 'drop-on');
         blockContainer.innerText = 'action';
 
         return block;
@@ -372,14 +387,49 @@ class BlockIf extends Block {
 
         // todo (if has value or block, duplicate it to and place it into the new one (call cloneElement on it)).
 
+
         return block;
     }
+}
+
+class BlockBoolean extends Block {
+    constructor(){
+        super()
+    }
+
+    static createElement() {
+        let block = super.createElement();
+        block.setAttribute('block-group', 'value');
+        block.setAttribute('block-type', 'BlockBoolean');
+        block.innerText = 'Vrai';
+
+        let checkBox = block.appendChild(document.createElement('input'));
+        checkBox.setAttribute('type', 'checkbox');
+        checkBox.setAttribute('checked', 'true');
+        checkBox.addEventListener('change', this.#eventCheckBoxClick);
+
+        return block;
+    }
+
+    static #eventCheckBoxClick(evnt) {
+        let isChecked = evnt.target.checked;
+        let parrent = evnt.target.parentElement;
+        parrent.innerText = (isChecked? 'Vrai': 'Faux');
+        let checkBox = parrent.appendChild(document.createElement('input'));
+        checkBox.setAttribute('type', 'checkbox');
+        if(isChecked){
+            checkBox.setAttribute('checked', 'true');
+        }
+        checkBox.addEventListener('change', BlockBoolean.#eventCheckBoxClick);
+    }
+
 }
 
 const BlockType = {
     'BlockStart': BlockStart,
     'BlockAction': BlockAction,
     'BlockIf': BlockIf,
+    'BlockBoolean': BlockBoolean,
 };
 
 

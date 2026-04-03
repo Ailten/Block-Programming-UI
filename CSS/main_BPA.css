@@ -64,7 +64,6 @@ div.block-programming-ui {
             border-radius: 5px;
             color: rgb(47, 171, 187);
             position: relative;
-            /*flex: 1; /* display: block; */
         }
     }
     & div.block[grab-on] {
@@ -90,6 +89,9 @@ div.block-programming-ui {
     }
     & div.block[block-group=condition] {
         background-color: rgb(255, 193, 74);
+    }
+    & div.block[block-group=value] {
+        background-color: rgb(114, 241, 114);
     }
 
     & div.block-list {
