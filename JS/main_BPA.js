@@ -127,8 +127,8 @@ class Block {
             let blockType = evnt.target.getAttribute('block-type');
             let block = canvas.appendChild(BlockType[blockType].createElement());
             block.setAttribute('grab-on', 'true');
-            let posY = evnt.y - evnt.target.clientHeight * 0.5;  // set pos.
-            let posX = evnt.x - evnt.target.clientWidth * 0.5;
+            let posY = evnt.y - Math.min(block.clientHeight, 40) * 0.5;  // set pos.
+            let posX = evnt.x - block.clientWidth * 0.5;
             block.style.top = `${posY}px`;
             block.style.left = `${posX}px`;
             BlockType[blockType].pointerDown({  // call mousedown event manually.
@@ -153,13 +153,13 @@ class Block {
 
         // clone / pop the block from the list.
         let targetType = BlockType[evnt.target.getAttribute('block-type')];
-        let target = targetType.cloneElement(evnt.target);
-        let posY = evnt.y - evnt.target.clientHeight * 0.5;  // set pos.
-        let posX = evnt.x - evnt.target.clientWidth * 0.5;
+        let canvas = Block.getCanvas(evnt.target);
+        let target = canvas.appendChild(targetType.cloneElement(evnt.target));
+        target.setAttribute('grab-on', 'true');
+        let posY = evnt.y - Math.min(target.clientHeight, 40) * 0.5;  // set pos.
+        let posX = evnt.x - target.clientWidth * 0.5;
         target.style.top = `${posY}px`;
         target.style.left = `${posX}px`;
-        let canvas = Block.getCanvas(evnt.target);
-        canvas.appendChild(target);
 
         // pop one block from a list of two (delete block-list).
         let blockIntoList = Array.from(blockList.querySelectorAll(':scope > div.block'))
@@ -202,6 +202,7 @@ class Block {
             return;
 
         // todo : TP block under mouse when leave. 
+
 
         // call event pointerUp when leave.
         let blockType = evnt.target.getAttribute('block-type');
