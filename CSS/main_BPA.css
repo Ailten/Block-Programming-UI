@@ -53,6 +53,19 @@ div.block-programming-ui {
         & *:nth-child(n+1) {
             margin-left: 8px;
         }
+
+        & div.value-container {
+            border: 2px dashed rgb(114, 241, 114);
+            border-radius: 5px;
+            color: rgb(68, 185, 68);
+        }
+        & div.block-container {
+            border: 2px dashed rgb(73, 214, 233);
+            border-radius: 5px;
+            color: rgb(47, 171, 187);
+            position: relative;
+            /*flex: 1; /* display: block; */
+        }
     }
     & div.block[grab-on] {
         cursor: grabbing;
@@ -69,11 +82,14 @@ div.block-programming-ui {
         animation-duration: 0.6s;
     }
 
-    & div.block-orange {
+    & div.block[block-group=event] {
         background-color: rgb(255, 157, 92);
     }
-    & div.block-blue {
+    & div.block[block-group=action] {
         background-color: rgb(73, 214, 233);
+    }
+    & div.block[block-group=condition] {
+        background-color: rgb(255, 193, 74);
     }
 
     & div.block-list {

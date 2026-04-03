@@ -15,6 +15,7 @@ window.addEventListener('load', () => {
             // define what block allow.
             myBpa.addBlockToMenu(BlockStart);
             myBpa.addBlockToMenu(BlockAction);
+            myBpa.addBlockToMenu(BlockIf);
 
     });
 
@@ -270,7 +271,7 @@ class BlockStart extends Block {
 
     static createElement() {
         let block = super.createElement();
-        block.classList.add('block-orange');
+        block.setAttribute('block-group', 'event');
         block.setAttribute('block-type', 'BlockStart');
         block.innerText = 'start';
         return block;
@@ -294,7 +295,7 @@ class BlockAction extends Block {
 
     static createElement() {
         let block = super.createElement();
-        block.classList.add('block-blue');
+        block.setAttribute('block-group', 'action');
         block.setAttribute('block-type', 'BlockAction');
         block.innerText = 'action';
 
@@ -343,12 +344,47 @@ class BlockAction extends Block {
     }
 }
 
+class BlockIf extends Block {
+    constructor() {
+        super();
+    }
+
+    static createElement() {
+        let block = super.createElement();
+        block.setAttribute('block-group', 'condition');
+        block.setAttribute('block-type', 'BlockIF');
+        block.innerText = 'si';
+
+        // add condition container.
+        let condition = block.appendChild(document.createElement('div'));
+        condition.classList.add('value-container');
+        condition.innerText = 'condition';
+
+        // add block-list container.
+        let blockContainer = block.appendChild(document.createElement('div'));
+        blockContainer.classList.add('block-container');
+        blockContainer.innerText = 'action';
+
+        return block;
+    }
+    static cloneElement(blockRef) {
+        let block = super.cloneElement(blockRef);
+
+        // todo (if has value or block, duplicate it to and place it into the new one (call cloneElement on it)).
+
+        return block;
+    }
+}
+
 const BlockType = {
     'BlockStart': BlockStart,
-    'BlockAction': BlockAction
+    'BlockAction': BlockAction,
+    'BlockIf': BlockIf,
 };
 
 
 // todo: 
-// grab-on on block allow to exit the canvas.
+// block "true / false" (with a check box on it).
+// block IF (with the possibility to place block into it).
+// (?) use the "block-into-it" for block-start.
 // (?) allow to move a list of block, the all block under (and into) the one grab-on.
