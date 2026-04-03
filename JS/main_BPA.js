@@ -63,7 +63,13 @@ class BPA {
 
     static intervalCheckGrabOn(evnt, bpaDiv) {
         let blockGrab = bpaDiv.querySelector('div.block[grab-on]');
-        if(blockGrab === null)
+        if(blockGrab === null)  // do not track if any block is grab-on.
+            return;
+
+        // block tracking mouse if exit the canvas.
+        let isMouseInCanvasRange = document.elementsFromPoint(evnt.clientX, evnt.clientY)
+            .includes(bpaDiv);
+        if(!isMouseInCanvasRange)
             return;
 
         let posY = evnt.clientY - Math.min(blockGrab.clientHeight, 40) * 0.5;  // set pos.
@@ -344,4 +350,5 @@ const BlockType = {
 
 
 // todo: 
+// grab-on on block allow to exit the canvas.
 // (?) allow to move a list of block, the all block under (and into) the one grab-on.
