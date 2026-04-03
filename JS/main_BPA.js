@@ -33,23 +33,6 @@ class BPA {
         this.bpaDiv = div;
         this.menu = this.#createMenu();
         this.garbage = this.#createGarbage();
-
-        // event for mouse up block.
-        this.bpaDiv.addEventListener('pointerup', (evnt) => {
-            let isNeedRedirectEvent = (
-                evnt.target.classList.contains('block') &&
-                evnt.target.hasAttribute('grab-on') &&
-                evnt.target.hasAttribute('event-down-manually')
-            );
-            if(isNeedRedirectEvent) {
-                evnt.target.removeAttribute('event-down-manually');
-                let blockType = evnt.target.getAttribute('block-type');
-                BlockType[blockType].pointerUp({
-                    target: evnt.target,
-                    isExecutedManually: true,
-                });
-            }
-        });
     }
 
     // create menu (div).
@@ -111,6 +94,15 @@ class Block {
         }
         return dom;
     }
+    static getBlockList(dom) {  // get the closest block-list (or null).
+        while(true){
+            if(dom.classList.contains('block-programming-ui'))
+                return null;
+            if(dom.classList.contains('block-list'))
+                return dom;
+            dom = dom.parentNode;
+        }
+    }
 
     static isCanBeConnected() {
         return true;
@@ -118,8 +110,9 @@ class Block {
 
     // event.
     static pointerDown(evnt) {
-        console.log(evnt);
         if(evnt.button !== 0)  // skip if it's not left click.
+            return;
+        if(!evnt.target.classList.contains('block'))  // skip if click on child-block (like a select).
             return;
 
         if(evnt.isExecutedManually !== undefined){
@@ -149,7 +142,48 @@ class Block {
             return;
         }
 
-        evnt.target.setAttribute('grab-on', 'true');
+        // verify if is on a block list.
+        let blockList = Block.getBlockList(evnt.target);
+        if(blockList === null){  // block is not into a block.
+
+            evnt.target.setAttribute('grab-on', 'true');
+
+            return;
+        }
+
+        // clone / pop the block from the list.
+        let targetType = BlockType[evnt.target.getAttribute('block-type')];
+        let target = targetType.cloneElement(evnt.target);
+        let posY = evnt.y - evnt.target.clientHeight * 0.5;  // set pos.
+        let posX = evnt.x - evnt.target.clientWidth * 0.5;
+        target.style.top = `${posY}px`;
+        target.style.left = `${posX}px`;
+        let canvas = Block.getCanvas(evnt.target);
+        canvas.appendChild(target);
+
+        // pop one block from a list of two (delete block-list).
+        let blockIntoList = Array.from(blockList.querySelectorAll(':scope > div.block'))
+            .filter(e => e !== evnt.target);
+        if(blockIntoList.length === 1){
+            let singleBlockInList = blockIntoList[0];
+            let singleBlockType = BlockType[singleBlockInList.getAttribute('block-type')];
+            let cloneSingleBlock = singleBlockType.cloneElement(singleBlockInList);
+            cloneSingleBlock.style.top = blockList.style.top;
+            cloneSingleBlock.style.left = blockList.style.left;
+            canvas.appendChild(cloneSingleBlock);
+            setTimeout(() => {  // delay destroy block-list, to stay event mouse manually executing.
+                blockList.parentElement.removeChild(blockList);
+            }, 10);
+        }
+
+        evnt.target.parentElement.removeChild(evnt.target);  // pop.
+        targetType.pointerDown({  // call mousedown event manually.
+            target: target,
+            button: evnt.button,
+            y: evnt.y,
+            x: evnt.x,
+            isExecutedManually: true,
+        });
 
     }
     static pointerMove(evnt) {
@@ -166,6 +200,8 @@ class Block {
     static pointerLeave(evnt) {
         if(!evnt.target.hasAttribute('grab-on'))
             return;
+
+        // todo : TP block under mouse when leave. 
 
         // call event pointerUp when leave.
         let blockType = evnt.target.getAttribute('block-type');
@@ -319,3 +355,26 @@ const BlockType = {
 // todo: 
 // can't re-move a block connected in a list.
 // can't move a list of block.
+
+
+
+
+
+// backup.
+
+        // event for mouse up block.
+        //this.bpaDiv.addEventListener('pointerup', (evnt) => {
+        //    let isNeedRedirectEvent = (
+        //        evnt.target.classList.contains('block') &&
+        //        evnt.target.hasAttribute('grab-on') &&
+        //        evnt.target.hasAttribute('event-down-manually')
+        //    );
+        //    if(isNeedRedirectEvent) {
+        //        evnt.target.removeAttribute('event-down-manually');
+        //        let blockType = evnt.target.getAttribute('block-type');
+        //        BlockType[blockType].pointerUp({
+        //            target: evnt.target,
+        //            isExecutedManually: true,
+        //        });
+        //    }
+        //});
