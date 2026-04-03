@@ -33,6 +33,10 @@ class BPA {
         this.bpaDiv = div;
         this.menu = this.#createMenu();
         this.garbage = this.#createGarbage();
+
+        this.bpaDiv.addEventListener('pointermove', (evnt) => {
+            BPA.intervalCheckGrabOn(evnt, div);
+        });
     }
 
     // create menu (div).
@@ -57,6 +61,18 @@ class BPA {
         
     }
 
+    static intervalCheckGrabOn(evnt, bpaDiv) {
+        let blockGrab = bpaDiv.querySelector('div.block[grab-on]');
+        if(blockGrab === null)
+            return;
+
+        let posY = evnt.clientY - Math.min(blockGrab.clientHeight, 40) * 0.5;  // set pos.
+        let posX = evnt.clientX - blockGrab.clientWidth * 0.5;
+        blockGrab.style.top = `${posY}px`;
+        blockGrab.style.left = `${posX}px`;
+
+    }
+
 }
 
 
@@ -70,8 +86,6 @@ class Block {
         let block = document.createElement('div');
         block.classList.add('block', 'drop-on');
         block.addEventListener('pointerdown', this.pointerDown);
-        block.addEventListener('pointermove', this.pointerMove);
-        block.addEventListener('pointerleave', this.pointerLeave);
         block.addEventListener('pointerup', this.pointerUp);
         return block;
     }
@@ -171,9 +185,10 @@ class Block {
             cloneSingleBlock.style.top = blockList.style.top;
             cloneSingleBlock.style.left = blockList.style.left;
             canvas.appendChild(cloneSingleBlock);
+            blockList.style.display = 'none';  // hidde it before destroy it.
             setTimeout(() => {  // delay destroy block-list, to stay event mouse manually executing.
                 blockList.parentElement.removeChild(blockList);
-            }, 10);
+            }, 5);
         }
 
         evnt.target.parentElement.removeChild(evnt.target);  // pop.
@@ -185,31 +200,6 @@ class Block {
             isExecutedManually: true,
         });
 
-    }
-    static pointerMove(evnt) {
-        if(!evnt.target.hasAttribute('grab-on'))
-            return;
-
-        // set pos.
-        let posY = evnt.clientY - evnt.target.clientHeight * 0.5;
-        let posX = evnt.clientX - evnt.target.clientWidth * 0.5;
-        evnt.target.style.top = `${posY}px`;
-        evnt.target.style.left = `${posX}px`;
-
-    }
-    static pointerLeave(evnt) {
-        if(!evnt.target.hasAttribute('grab-on'))
-            return;
-
-        // todo : TP block under mouse when leave. 
-
-
-        // call event pointerUp when leave.
-        let blockType = evnt.target.getAttribute('block-type');
-        BlockType[blockType].pointerUp({
-            target: evnt.target,
-            isExecutedManually: true
-        });
     }
     static pointerUp(evnt) {
         evnt.target.removeAttribute('grab-on');
@@ -354,29 +344,4 @@ const BlockType = {
 
 
 // todo: 
-// TP block when leave the block with cursor-leave.
 // (?) allow to move a list of block, the all block under (and into) the one grab-on.
-
-
-
-
-
-
-// backup.
-
-        // event for mouse up block.
-        //this.bpaDiv.addEventListener('pointerup', (evnt) => {
-        //    let isNeedRedirectEvent = (
-        //        evnt.target.classList.contains('block') &&
-        //        evnt.target.hasAttribute('grab-on') &&
-        //        evnt.target.hasAttribute('event-down-manually')
-        //    );
-        //    if(isNeedRedirectEvent) {
-        //        evnt.target.removeAttribute('event-down-manually');
-        //        let blockType = evnt.target.getAttribute('block-type');
-        //        BlockType[blockType].pointerUp({
-        //            target: evnt.target,
-        //            isExecutedManually: true,
-        //        });
-        //    }
-        //});
