@@ -92,6 +92,13 @@ class Block {
         block.addEventListener('pointerup', this.pointerUp);
         return block;
     }
+    static cloneElement(blockRef) {
+        let block = this.createElement();
+        block.style.top = blockRef.style.top;
+        block.style.left = blockRef.style.left;
+        return block;
+    }
+
     static getMenu(dom) {
         while(!dom.classList.contains('menu-block')){
             dom = dom.parentNode;
@@ -111,6 +118,7 @@ class Block {
 
     // event.
     static pointerDown(evnt) {
+        console.log(evnt);
         if(evnt.button !== 0)  // skip if it's not left click.
             return;
 
@@ -191,7 +199,8 @@ class Block {
         }
 
         // verify if can be drop.
-        let isCanBeConnected = BlockType[evnt.target.getAttribute('block-type')].isCanBeConnected();
+        let targetBlockType = BlockType[evnt.target.getAttribute('block-type')];
+        let isCanBeConnected = targetBlockType.isCanBeConnected();
         if(!isCanBeConnected)
             return;
 
@@ -199,7 +208,7 @@ class Block {
         let blockContainer = elementBehind.parentElement;
         if(!blockContainer.classList.contains('block-list')){
             let divContainer = blockContainer.appendChild(document.createElement('div'));
-            let blockClone = elementBehind.cloneNode(true);
+            let blockClone = BlockType[elementBehind.getAttribute('block-type')].cloneElement(elementBehind);
             blockContainer.removeChild(elementBehind);
             blockContainer = divContainer;
             elementBehind = blockClone;
@@ -212,7 +221,7 @@ class Block {
         }
 
         // move target in the block list.
-        let target = evnt.target.cloneNode(true);
+        let target = targetBlockType.cloneElement(evnt.target);
         blockContainer.insertBefore(target, elementBehind.nextSibling);  // fake insertAfter.
         evnt.target.parentNode.removeChild(evnt.target);
         target.style.top = '0px';
@@ -267,18 +276,37 @@ class BlockAction extends Block {
             if(i === 0){
                 option.setAttribute('selected', 'true');
             }
-            option.addEventListener('click', evnt => {
-                Array.prototype.forEach.call(
-                    evnt.target.parentElement.getElementsByTagName('option'),
-                    (option) => {
-                        option.removeAttribute('selected');
-                    }
-                )
-                evnt.target.setAttribute('selected', 'true');
-            });
+            option.addEventListener('click', this.#eventOptionClick);
         })
 
         return block;
+    }
+    static cloneElement(blockRef) {
+        let block = super.cloneElement(blockRef);
+        let optionsRef = blockRef.getElementsByTagName('option');
+        Array.prototype.forEach.call(
+            block.getElementsByTagName('option'),
+            (option, i) => {
+                if(i === 0){
+                    option.removeAttribute('selected');
+                }
+                if(optionsRef[i].hasAttribute('selected')){
+                    option.setAttribute('selected', 'true');
+                }
+                option.addEventListener('click', this.#eventOptionClick);
+            }
+        );
+        return block;
+    }
+
+    static #eventOptionClick(evnt) {
+        Array.prototype.forEach.call(
+            evnt.target.parentElement.getElementsByTagName('option'),
+            (option) => {
+                option.removeAttribute('selected');
+            }
+        )
+        evnt.target.setAttribute('selected', 'true');
     }
 }
 
