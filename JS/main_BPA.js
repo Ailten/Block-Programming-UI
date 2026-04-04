@@ -150,7 +150,6 @@ class Block {
 
         // contain one block.
         if(!domContainer.firstChild.classList.contains('block-list')){
-            console.log(domContainer.firstChild);
             let blockType = domContainer.firstChild.getAttribute('block-type');
             return BlockType[blockType].cloneElement(domContainer.firstChild);
         }
@@ -163,7 +162,6 @@ class Block {
         Array.prototype.forEach.call(
             domContainer.firstChild.querySelectorAll(':scope > div.block'),
             (block) => {
-                console.log(block);
                 let blockType = block.getAttribute('block-type');
                 output.appendChild(BlockType[blockType].cloneElement(block));
             }
