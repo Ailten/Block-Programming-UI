@@ -596,4 +596,6 @@ BlockType['BlockBoolean'] = BlockBoolean;
 
 
 // todo: 
+// make other block values.
+// make block loop.
 // (?) allow to move a list of block, the all block under (and into) the one grab-on.
