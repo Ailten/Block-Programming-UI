@@ -58,12 +58,44 @@ div.block-programming-ui {
             border: 2px dashed rgb(114, 241, 114);
             border-radius: 5px;
             color: rgb(68, 185, 68);
+            padding: 0.5em 1.2em;
         }
         & div.block-container {
             border: 2px dashed rgb(73, 214, 233);
             border-radius: 5px;
             color: rgb(47, 171, 187);
-            position: relative;
+            padding: 0.5em 1.2em;
+        }
+        & div.fill-container {
+            border: none;
+            color: black;
+            padding: 0;
+        }
+
+        & div.hidde {
+            display: none;
+        }
+
+        & div.block-inner-line {
+            margin: 0;
+
+            display: flex;/* center text */
+            justify-content: center;
+            align-items: center;
+
+            & *:first-child {
+                margin-left: 0;
+            }
+            & *:nth-child(n+2) {
+                margin-left: 8px;
+            }
+        }
+        & div.block-inner-line:nth-child(n+2) {
+            margin-top: 8px;
+        }
+        & div.block-inner-line.indent {
+            margin-left: 24px;
+            justify-content: left;
         }
     }
     & div.block[grab-on] {
@@ -71,14 +103,22 @@ div.block-programming-ui {
         opacity: 0.6;
         box-shadow: -2px 2px 4px rgba(0,0,0, 0.4);
         z-index: 100;
+        padding: 0.5em 1.2em !important;  /* overide padding for grab-on, over css into balise */
 
         & * {
             display: none;  /* hidde balise child when grab-on (for stay pointer-move event) */
+            margin: 0 !important;
+        }
+        & div.show-on-grab {
+            display: block;
         }
     }
     & div.block.delete-pop-scale {
         animation-name: delete-pop-scale;
         animation-duration: 0.6s;
+    }
+    & div.block:has(> div.block-inner-line) {
+        display: block;
     }
 
     & div.block[block-group=event] {

@@ -125,15 +125,40 @@ class Block {
             dom = dom.parentNode;
         }
     }
+    static getBlock(dom) {  // get the block parent closest (or null).
+        while(true){
+            if(dom.classList.contains('block-programming-ui'))
+                return null;
+            if(dom.classList.contains('block'))
+                return dom;
+            dom = dom.parentNode;
+        }
+    }
 
     static isCanBeConnected() {
         return true;
+    }
+    static isCanBeConnectedToValueContainer() {
+        return false;
     }
 
     // event.
     static pointerDown(evnt) {
         if(evnt.button !== 0)  // skip if it's not left click.
             return;
+        if(evnt.target.classList.contains('can-be-grab-by')){
+            let block = Block.getBlock(evnt.target);
+            if(block === null)
+                return;
+            BlockType[block.getAttribute('block-type')].pointerDown({  // call mousedown event manually.
+                target: block,
+                button: evnt.button,
+                y: evnt.y,
+                x: evnt.x,
+                isExecutedManually: true,
+            });
+            return;
+        }
         if(!evnt.target.classList.contains('block'))  // skip if click on child-block (like a select).
             return;
 
@@ -210,14 +235,21 @@ class Block {
 
     }
     static pointerUp(evnt) {
-        if(!evnt.target.classList.contains('block'))
+        if(!evnt.target.classList.contains('block')){
+            let block = Block.getBlock(evnt.target);
+            if(block === null)
+                return;
+            BlockType[block.getAttribute('block-type')].pointerUp({
+                target: block,
+                clientX: evnt.clientX,
+                clientY: evnt.clientY,
+                isExecutedManually: true,
+            });
             return;
+        }
 
         evnt.target.removeAttribute('grab-on');
         evnt.target.removeAttribute('event-down-manually');
-
-        if(evnt.isExecutedManually !== undefined)
-            return;
 
         // find block 'drop-on' behind.
         let elementBehind = document.elementsFromPoint(evnt.clientX, evnt.clientY)
@@ -237,15 +269,46 @@ class Block {
         }
 
         // value or action block.
-        let blockValue = (
-            elementBehind.classList.contains('value') ? 'value':
-            elementBehind.classList.contains('action') ? 'action':
+        let isBlockValue = (
+            elementBehind.classList.contains('value-container') ? true:
+            elementBehind.classList.contains('action-container') ? false:
             null
         );
-        if(blockValue !== null){
+        if(isBlockValue !== null){
+
+            // verification.
+            let blockParent = Block.getBlock(elementBehind);
+            if(blockParent === null)
+                return;
+            let blockType = BlockType[evnt.target.getAttribute('block-type')];
+            let isCanBeDrop = (
+                isBlockValue? blockType.isCanBeConnectedToValueContainer():
+                blockType.isCanBeConnected()
+            );
+            if(!isCanBeDrop)
+                return;
+
+            // when is value-container.
+            if(isBlockValue){
+
+                // todo (value-container).
+                // clone and place it into the value-container.
+                // verify pos and margin/padding.
+                // verify value-container css (set a class fill-container).
+                // (remove class fill-container when grab from one who has).
+
+                return;
+            }
+
+            // when is action-container.
+            // todo (action-container).
 
             return;
         }
+
+        // not allow to connect under a value.
+        if(BlockType[elementBehind.getAttribute('block-type')].isCanBeConnectedToValueContainer())
+            return;
 
         // verify if can be drop.
         let targetBlockType = BlockType[evnt.target.getAttribute('block-type')];
@@ -368,15 +431,22 @@ class BlockIf extends Block {
         let block = super.createElement();
         block.setAttribute('block-group', 'condition');
         block.setAttribute('block-type', 'BlockIf');
-        block.innerText = 'si';
 
-        // add condition container.
-        let condition = block.appendChild(document.createElement('div'));
+        let divLine = block.appendChild(document.createElement('div'));  // line one.
+        divLine.classList.add('block-inner-line', 'show-on-grab');
+
+        let txt = divLine.appendChild(document.createElement('div'));
+        txt.classList.add('show-on-grab', 'can-be-grab-by');
+        txt.innerText = 'si';
+
+        let condition = divLine.appendChild(document.createElement('div'));
         condition.classList.add('value-container', 'drop-on');
         condition.innerText = 'condition';
 
-        // add block-list container.
-        let blockContainer = block.appendChild(document.createElement('div'));
+        divLine = block.appendChild(document.createElement('div'));  // line two.
+        divLine.classList.add('block-inner-line', 'indent');
+
+        let blockContainer = divLine.appendChild(document.createElement('div'));
         blockContainer.classList.add('block-container', 'drop-on');
         blockContainer.innerText = 'action';
 
@@ -386,7 +456,7 @@ class BlockIf extends Block {
         let block = super.cloneElement(blockRef);
 
         // todo (if has value or block, duplicate it to and place it into the new one (call cloneElement on it)).
-
+        // use class "hidde" on blockValue / blockContainer.
 
         return block;
     }
@@ -395,6 +465,13 @@ class BlockIf extends Block {
 class BlockBoolean extends Block {
     constructor(){
         super()
+    }
+
+    static isCanBeConnected() {
+        return false;
+    }
+    static isCanBeConnectedToValueContainer() {
+        return true;
     }
 
     static createElement() {
@@ -406,7 +483,21 @@ class BlockBoolean extends Block {
         let checkBox = block.appendChild(document.createElement('input'));
         checkBox.setAttribute('type', 'checkbox');
         checkBox.setAttribute('checked', 'true');
-        checkBox.addEventListener('change', this.#eventCheckBoxClick);
+        checkBox.addEventListener('change', BlockBoolean.#eventCheckBoxClick);
+
+        return block;
+    }
+    static cloneElement(blockRef) {
+        let block = super.cloneElement(blockRef);
+
+        let isChecked = blockRef.getElementsByTagName('input')[0].checked;
+        block.innerText = (isChecked? 'Vrai': 'Faux');
+        let checkBox = block.appendChild(document.createElement('input'));
+        checkBox.setAttribute('type', 'checkbox')
+        if(isChecked){
+            checkBox.setAttribute('checked', 'true');
+        }
+        checkBox.addEventListener('change', BlockBoolean.#eventCheckBoxClick);
 
         return block;
     }
