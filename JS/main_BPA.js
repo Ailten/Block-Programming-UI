@@ -144,6 +144,33 @@ class Block {
         return false;
     }
 
+    static cloneContanerContend(domContainer) {
+        if(!domContainer.classList.contains('fill-container'))  // container empty.
+            return null;
+
+        // contain one block.
+        if(!domContainer.firstChild.classList.contains('block-list')){
+            console.log(domContainer.firstChild);
+            let blockType = domContainer.firstChild.getAttribute('block-type');
+            return BlockType[blockType].cloneElement(domContainer.firstChild);
+        }
+
+        // contain block-list.
+        let output = document.createElement('div');
+        output.classList.add('block-list');
+        output.style.top = '0px';
+        output.style.left = '0px';
+        Array.prototype.forEach.call(
+            domContainer.firstChild.querySelectorAll(':scope > div.block'),
+            (block) => {
+                console.log(block);
+                let blockType = block.getAttribute('block-type');
+                output.appendChild(BlockType[blockType].cloneElement(block));
+            }
+        );
+        return output;
+    }
+
     // event.
     static pointerDown(evnt) {
         if(evnt.button !== 0)  // skip if it's not left click.
@@ -487,8 +514,27 @@ class BlockIf extends Block {
     static cloneElement(blockRef) {
         let block = super.cloneElement(blockRef);
 
-        // todo (if has value or block, duplicate it to and place it into the new one (call cloneElement on it)).
-        // use class "hidde" on blockValue / blockContainer.
+        // clone value-container.
+        let query = ':scope > div.block-inner-line:nth-child(1) > div.value-container';
+        let container = blockRef.querySelector(query);
+        let newContainer = block.querySelector(query);
+        let containerFill = Block.cloneContanerContend(container);
+        if(containerFill !== null){
+            newContainer.innerText = '';
+            newContainer.appendChild(containerFill);
+            newContainer.classList.add('fill-container');
+        }
+
+        // clone block-container
+        query = ':scope > div.block-inner-line:nth-child(2) > div.block-container';
+        container = blockRef.querySelector(query);
+        newContainer = block.querySelector(query);
+        containerFill = Block.cloneContanerContend(container);
+        if(containerFill !== null){
+            newContainer.innerText = '';
+            newContainer.appendChild(containerFill);
+            newContainer.classList.add('fill-container');
+        }
 
         return block;
     }
