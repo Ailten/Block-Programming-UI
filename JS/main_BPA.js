@@ -20,6 +20,12 @@ window.addEventListener('load', () => {
 
     });
 
+    document.getElementById('button-output-test').addEventListener('click', (evnt) => {
+        console.log(
+            myBpa.getCode()
+        );
+    });
+
 });
 
 
@@ -79,6 +85,41 @@ class BPA {
         blockGrab.style.top = `${posY}px`;
         blockGrab.style.left = `${posX}px`;
 
+    }
+
+    getCode(){
+        return BPA.getCodeFromBpaDiv(this.bpaDiv);
+    }
+    static getCodeFromBpaDiv(bpaDiv) {
+        let output = '';
+
+        // get all block-list starting with a block-group event.
+        Array.prototype.forEach.call(
+            bpaDiv.querySelectorAll(':scope > div.block-list:has(> div[block-group=event]:first-child)'),
+            (blockList, i) => {
+                if(i !== 0){  // separator between event.
+                    output += '\n';
+                }
+
+                // get all block under an event.
+                Array.prototype.forEach.call(
+                    blockList.querySelectorAll(':scope > div.block'),
+                    (block, j) => {
+                        let blockType = block.getAttribute('block-type');
+                        output += BlockType[blockType].getCode(
+                            block, 
+                            (j === 0? '': Block.getTab(1))
+                        );
+                    }
+                )
+
+                // close the event scope.
+                output += '}\n';
+
+            }
+        );
+
+        return output;
     }
 
 }
@@ -167,6 +208,13 @@ class Block {
             }
         );
         return output;
+    }
+
+    static getCode(block, indent=''){
+        return `${indent}// generic-block.\n`;
+    }
+    static getTab(amount=1){  // return char tabulation.
+        return " ".repeat(amount*2);
     }
 
     // event.
@@ -411,6 +459,10 @@ class BlockStart extends Block {
     static isCanBeConnected() {
         return false;
     }
+    
+    static getCode(block, indent=''){
+        return `${indent}function start() {\n`;
+    }
 }
 BlockType['BlockStart'] = BlockStart;
 
@@ -474,6 +526,11 @@ class BlockAction extends Block {
         )
         evnt.target.setAttribute('selected', 'true');
     }
+
+    static getCode(block, indent='') {
+        let optionSelected = block.getElementsByTagName('select')[0].selectedOptions[0];
+        return `${indent}action("${optionSelected.getAttribute('value')}", "${optionSelected.innerText}");\n`;
+    }
 }
 BlockType['BlockAction'] = BlockAction;
 
@@ -536,6 +593,41 @@ class BlockIf extends Block {
 
         return block;
     }
+
+    static getCode(block, indent='') {
+        // get value.
+        let valueContainer = block.querySelector(':scope > div.block-inner-line:nth-child(1) > div.value-container');
+        let value = 'false';
+        if(valueContainer.classList.contains('fill-container')){
+            let blockType = valueContainer.firstChild.getAttribute('block-type');
+            value = BlockType[blockType].getCode(valueContainer.firstChild);
+        }
+
+        // get actions (block-container).
+        let actionContainer = block.querySelector(':scope > div.block-inner-line:nth-child(2) > div.block-container');
+        let action = '';
+        if(actionContainer.classList.contains('fill-container')){
+            let actionChild = actionContainer.firstChild;
+            if(actionChild.classList.contains('block-list')){
+                Array.prototype.forEach.call(
+                    actionChild.querySelectorAll(':scope > div.block'),
+                    (block) => {
+                        let blockType = block.getAttribute('block-type');
+                        action += BlockType[blockType].getCode(block, indent+Block.getTab(1));
+                    }
+                );
+            }else{  // only one block action.
+                let blockType = actionChild.getAttribute('block-type');
+                action = BlockType[blockType].getCode(actionChild, indent+Block.getTab(1));
+            }
+        }
+
+        return (
+            `${indent}if(${value}) {\n`+
+            `${action}`+
+            `${indent}}\n`
+        );
+    }
 }
 BlockType['BlockIf'] = BlockIf;
 
@@ -591,6 +683,9 @@ class BlockBoolean extends Block {
         checkBox.addEventListener('change', BlockBoolean.#eventCheckBoxClick);
     }
 
+    static getCode(block, indent='') {
+        return (block.getElementsByTagName('input')[0].checked? 'true': 'false');
+    }
 }
 BlockType['BlockBoolean'] = BlockBoolean;
 
