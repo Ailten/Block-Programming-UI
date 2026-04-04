@@ -43,7 +43,7 @@ div.block-programming-ui {
         overflow: hidden;
 
         display: flex;  /* center text */
-        justify-content: center;
+        justify-content: left;  /* code to left */
         align-items: center;
 
         -webkit-user-select: none; /* Safari */  /* disable text selection */
@@ -70,6 +70,10 @@ div.block-programming-ui {
             border: none;
             color: black;
             padding: 0;
+
+            & * {
+                position: relative;
+            }
         }
 
         & div.hidde {
@@ -80,15 +84,14 @@ div.block-programming-ui {
             margin: 0;
 
             display: flex;/* center text */
-            justify-content: center;
+            justify-content: left;
             align-items: center;
-
-            & *:first-child {
-                margin-left: 0;
-            }
-            & *:nth-child(n+2) {
-                margin-left: 8px;
-            }
+        }
+        & div.block-inner-line > *:first-child {
+            margin-left: 0;
+        }
+        & div.block-inner-line > *:nth-child(n+2) {
+            margin-left: 8px;
         }
         & div.block-inner-line:nth-child(n+2) {
             margin-top: 8px;

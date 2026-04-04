@@ -189,6 +189,29 @@ class Block {
             return;
         }
 
+        // verify if is on a block value-container.
+        let container = evnt.target.parentElement;
+        if(container === null)
+            return;
+        if(container.classList.contains('fill-container')){
+
+            let blockType = BlockType[evnt.target.getAttribute('block-type')];
+            let block = blockType.cloneElement(evnt.target);
+            let canvas = Block.getCanvas(evnt.target);
+            canvas.appendChild(block);
+            block.setAttribute('grab-on', 'true');
+            let posY = evnt.y - Math.min(evnt.target.clientHeight, 40) * 0.5;  // set pos.
+            let posX = evnt.x - evnt.target.clientWidth * 0.5;
+            block.style.top = `${posY}px`;
+            block.style.left = `${posX}px`;
+
+            evnt.target.parentElement.removeChild(evnt.target);
+            container.classList.remove('fill-container');
+            container.innerText = container.getAttribute('inner-text');
+
+            return;
+        }
+
         // verify if is on a block list.
         let blockList = Block.getBlockList(evnt.target);
         if(blockList === null){  // block is not into a block.
@@ -235,7 +258,7 @@ class Block {
 
     }
     static pointerUp(evnt) {
-        if(!evnt.target.classList.contains('block')){
+        if(evnt.target.classList.contains('can-be-grab-by')){
             let block = Block.getBlock(evnt.target);
             if(block === null)
                 return;
@@ -247,6 +270,8 @@ class Block {
             });
             return;
         }
+        if(!evnt.target.classList.contains('block'))
+            return;
 
         evnt.target.removeAttribute('grab-on');
         evnt.target.removeAttribute('event-down-manually');
@@ -268,10 +293,10 @@ class Block {
             return;
         }
 
-        // value or action block.
+        // value or block block.
         let isBlockValue = (
             elementBehind.classList.contains('value-container') ? true:
-            elementBehind.classList.contains('action-container') ? false:
+            elementBehind.classList.contains('block-container') ? false:
             null
         );
         if(isBlockValue !== null){
@@ -288,20 +313,14 @@ class Block {
             if(!isCanBeDrop)
                 return;
 
-            // when is value-container.
-            if(isBlockValue){
-
-                // todo (value-container).
-                // clone and place it into the value-container.
-                // verify pos and margin/padding.
-                // verify value-container css (set a class fill-container).
-                // (remove class fill-container when grab from one who has).
-
-                return;
-            }
-
-            // when is action-container.
-            // todo (action-container).
+            // insert clone in value/block-container.
+            let block = blockType.cloneElement(evnt.target);
+            elementBehind.innerText = '';
+            elementBehind.appendChild(block);
+            elementBehind.classList.add('fill-container');
+            evnt.target.parentNode.removeChild(evnt.target);
+            block.style.top = '0px';
+            block.style.left = '0px';
 
             return;
         }
@@ -442,6 +461,7 @@ class BlockIf extends Block {
         let condition = divLine.appendChild(document.createElement('div'));
         condition.classList.add('value-container', 'drop-on');
         condition.innerText = 'condition';
+        condition.setAttribute('inner-text', 'condition');
 
         divLine = block.appendChild(document.createElement('div'));  // line two.
         divLine.classList.add('block-inner-line', 'indent');
@@ -449,6 +469,7 @@ class BlockIf extends Block {
         let blockContainer = divLine.appendChild(document.createElement('div'));
         blockContainer.classList.add('block-container', 'drop-on');
         blockContainer.innerText = 'action';
+        blockContainer.setAttribute('inner-text', 'action');
 
         return block;
     }
@@ -525,7 +546,5 @@ const BlockType = {
 
 
 // todo: 
-// block "true / false" (with a check box on it).
-// block IF (with the possibility to place block into it).
-// (?) use the "block-into-it" for block-start.
+// when un-link two block action (into a block-container), do not drop the last one from nowhere.
 // (?) allow to move a list of block, the all block under (and into) the one grab-on.
