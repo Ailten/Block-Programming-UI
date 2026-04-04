@@ -21,7 +21,7 @@ window.addEventListener('load', () => {
     });
 
     document.getElementById('button-output-test').addEventListener('click', (evnt) => {
-        console.log(
+        document.getElementById('output-code-test').innerHTML = (
             myBpa.getCode()
         );
     });
@@ -691,6 +691,7 @@ BlockType['BlockBoolean'] = BlockBoolean;
 
 
 // todo: 
+// !! restrict to connect block into container from the menu.
 // make other block values.
 // make block loop.
-// (?) allow to move a list of block, the all block under (and into) the one grab-on.
+// (?) make block-start work with a "action" under.
