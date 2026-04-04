@@ -73,6 +73,7 @@ div.block-programming-ui {
 
             & * {
                 position: relative;
+                margin-left: 0;
             }
         }
 

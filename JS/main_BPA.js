@@ -86,6 +86,8 @@ class BPA {
 
 // ---------- Block.
 
+var BlockType = {};
+
 class Block {
     constructor() {
     }
@@ -238,9 +240,16 @@ class Block {
             let singleBlockInList = blockIntoList[0];
             let singleBlockType = BlockType[singleBlockInList.getAttribute('block-type')];
             let cloneSingleBlock = singleBlockType.cloneElement(singleBlockInList);
-            cloneSingleBlock.style.top = blockList.style.top;
-            cloneSingleBlock.style.left = blockList.style.left;
-            canvas.appendChild(cloneSingleBlock);
+
+            // place it diferently if it into a block-container.
+            if(blockList.parentElement.classList.contains('fill-container')){
+                blockList.parentElement.appendChild(cloneSingleBlock);
+            }else{  // when block-list in canvas (directly).
+                cloneSingleBlock.style.top = blockList.style.top;
+                cloneSingleBlock.style.left = blockList.style.left;
+                canvas.appendChild(cloneSingleBlock);
+            }
+
             blockList.style.display = 'none';  // hidde it before destroy it.
             setTimeout(() => {  // delay destroy block-list, to stay event mouse manually executing.
                 blockList.parentElement.removeChild(blockList);
@@ -378,6 +387,7 @@ class BlockStart extends Block {
         return false;
     }
 }
+BlockType['BlockStart'] = BlockStart;
 
 class BlockAction extends Block {
     static actionDico = [
@@ -440,6 +450,7 @@ class BlockAction extends Block {
         evnt.target.setAttribute('selected', 'true');
     }
 }
+BlockType['BlockAction'] = BlockAction;
 
 class BlockIf extends Block {
     constructor() {
@@ -482,6 +493,7 @@ class BlockIf extends Block {
         return block;
     }
 }
+BlockType['BlockIf'] = BlockIf;
 
 class BlockBoolean extends Block {
     constructor(){
@@ -536,15 +548,8 @@ class BlockBoolean extends Block {
     }
 
 }
-
-const BlockType = {
-    'BlockStart': BlockStart,
-    'BlockAction': BlockAction,
-    'BlockIf': BlockIf,
-    'BlockBoolean': BlockBoolean,
-};
+BlockType['BlockBoolean'] = BlockBoolean;
 
 
 // todo: 
-// when un-link two block action (into a block-container), do not drop the last one from nowhere.
 // (?) allow to move a list of block, the all block under (and into) the one grab-on.
