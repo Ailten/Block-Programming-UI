@@ -17,7 +17,8 @@ window.addEventListener('load', () => {
             myBpa.addBlockToMenu(BlockAction);
             myBpa.addBlockToMenu(BlockIf);
             myBpa.addBlockToMenu(BlockBoolean);
-            myBpa.addBlockToMenu(BlockComparator);
+            myBpa.addBlockToMenu(BlockComparator);BlockWhile
+            myBpa.addBlockToMenu(BlockWhile);
 
     });
 
@@ -81,8 +82,8 @@ class BPA {
         if(!isMouseInCanvasRange)
             return;
 
-        let posY = evnt.clientY - Math.min(blockGrab.clientHeight, 40) * 0.5;  // set pos.
-        let posX = evnt.clientX - blockGrab.clientWidth * 0.5;
+        let posY = evnt.clientY - Math.min(blockGrab.clientHeight, 20) * 0.5;  // set pos.
+        let posX = evnt.clientX - Math.min(blockGrab.clientWidth, 90) * 0.5;
         blockGrab.style.top = `${posY}px`;
         blockGrab.style.left = `${posX}px`;
 
@@ -261,8 +262,8 @@ class Block {
             let blockType = evnt.target.getAttribute('block-type');
             let block = canvas.appendChild(BlockType[blockType].createElement());
             block.setAttribute('grab-on', 'true');
-            let posY = evnt.y - Math.min(block.clientHeight, 40) * 0.5;  // set pos.
-            let posX = evnt.x - block.clientWidth * 0.5;
+            let posY = evnt.y - Math.min(block.clientHeight, 20) * 0.5;  // set pos.
+            let posX = evnt.x - Math.min(block.clientWidth, 90) * 0.5;
             block.style.top = `${posY}px`;
             block.style.left = `${posX}px`;
             BlockType[blockType].pointerDown({  // call mousedown event manually.
@@ -287,8 +288,8 @@ class Block {
             let canvas = Block.getCanvas(evnt.target);
             canvas.appendChild(block);
             block.setAttribute('grab-on', 'true');
-            let posY = evnt.y - Math.min(evnt.target.clientHeight, 40) * 0.5;  // set pos.
-            let posX = evnt.x - evnt.target.clientWidth * 0.5;
+            let posY = evnt.y - Math.min(evnt.target.clientHeight, 20) * 0.5;  // set pos.
+            let posX = evnt.x - Math.min(evnt.target.clientWidth, 90) * 0.5;
             block.style.top = `${posY}px`;
             block.style.left = `${posX}px`;
 
@@ -313,8 +314,8 @@ class Block {
         let canvas = Block.getCanvas(evnt.target);
         let target = canvas.appendChild(targetType.cloneElement(evnt.target));
         target.setAttribute('grab-on', 'true');
-        let posY = evnt.y - Math.min(target.clientHeight, 40) * 0.5;  // set pos.
-        let posX = evnt.x - target.clientWidth * 0.5;
+        let posY = evnt.y - Math.min(target.clientHeight, 20) * 0.5;  // set pos.
+        let posX = evnt.x - Math.min(target.clientWidth, 90) * 0.5;
         target.style.top = `${posY}px`;
         target.style.left = `${posX}px`;
 
@@ -845,7 +846,31 @@ class BlockComparator extends Block {
 }
 BlockType['BlockComparator'] = BlockComparator;
 
+class BlockWhile extends BlockIf {
+    constructor() {
+        super();
+    }
+
+    static createElement() {
+        let block = super.createElement();
+        block.setAttribute('block-type', 'BlockWhile');
+
+        let txt = block.querySelector(':scope > div.block-inner-line:first-child > div.show-on-grab:first-child');
+        txt.innerText = 'répéte';
+
+        return block;
+    }
+
+    static getCode(block, indent='') {
+        let outputStr = super.getCode(block, indent);
+        return outputStr.replace(/^[ ]{0,}if/, `${indent}while`);
+    }
+}
+BlockType['BlockWhile'] = BlockWhile;
+
 
 // todo: 
+// (?) generic function for posX, posY.
+// make block break (for loop).
 // make other block values.
 // make block loop.

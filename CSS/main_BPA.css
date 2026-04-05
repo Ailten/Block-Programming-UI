@@ -80,10 +80,6 @@ div.block-programming-ui {
             }
         }
 
-        & div.hidde {
-            display: none;
-        }
-
         & div.block-inner-line {
             margin: 0;
 
@@ -118,6 +114,15 @@ div.block-programming-ui {
         }
         & div.show-on-grab {
             display: block;
+        }
+    }
+    & div.block[is-in-menu][block-type=BlockComparator] {  /* to reduce block (in menu) */
+        & div.value-container, 
+        div.block-container {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 20px;
+            padding: 0.5em;
         }
     }
     & div.block.delete-pop-scale {
