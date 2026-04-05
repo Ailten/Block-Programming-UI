@@ -506,9 +506,9 @@ BlockType['BlockStart'] = BlockStart;
 
 class BlockAction extends Block {
     static actionDico = [
-        {value: '1', libele: 'atk.'},
-        {value: '2', libele: 'def.'},
-        {value: '3', libele: 'soin'},
+        {value: '1', libele: 'marcher'},
+        {value: '2', libele: 'tourner'},
+        {value: '3', libele: 'attraper'},
     ];
 
     constructor() {
