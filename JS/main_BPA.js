@@ -386,10 +386,6 @@ class Block {
             return;
         }
 
-        console.log('---')
-        console.log(elementBehind)
-        console.log(evnt.target)
-
         // verify if can be connect (or fill).
         if(!Block.isCanConnect(elementBehind, evnt.target))
             return;
@@ -405,6 +401,8 @@ class Block {
             // verification.
             let blockParent = Block.getBlock(elementBehind);
             if(blockParent === null)
+                return;
+            if(blockParent.hasAttribute('is-in-menu'))
                 return;
 
             // insert clone in value/block-container.
@@ -725,4 +723,3 @@ BlockType['BlockBoolean'] = BlockBoolean;
 // !! restrict to connect block into container from the menu.
 // make other block values.
 // make block loop.
-// (?) make block-start work with a "action" under.
