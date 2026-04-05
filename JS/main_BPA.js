@@ -95,26 +95,14 @@ class BPA {
 
         // get all block-list starting with a block-group event.
         Array.prototype.forEach.call(
-            bpaDiv.querySelectorAll(':scope > div.block-list:has(> div[block-group=event]:first-child)'),
-            (blockList, i) => {
+            bpaDiv.querySelectorAll(':scope > div.block[block-group=event]'),
+            (blockEvent, i) => {
                 if(i !== 0){  // separator between event.
                     output += '\n';
                 }
 
-                // get all block under an event.
-                Array.prototype.forEach.call(
-                    blockList.querySelectorAll(':scope > div.block'),
-                    (block, j) => {
-                        let blockType = block.getAttribute('block-type');
-                        output += BlockType[blockType].getCode(
-                            block, 
-                            (j === 0? '': Block.getTab(1))
-                        );
-                    }
-                )
-
-                // close the event scope.
-                output += '}\n';
+                let blockType = blockEvent.getAttribute('block-type');
+                output += BlockType[blockType].getCode(blockEvent, '');
 
             }
         );
@@ -178,10 +166,33 @@ class Block {
         }
     }
 
-    static isCanBeConnected() {
-        return true;
-    }
-    static isCanBeConnectedToValueContainer() {
+    static isCanConnect(blockBehind, blockGrab) {
+        let blockBehindType = (
+            blockBehind.hasAttribute('block-group') ? blockBehind.getAttribute('block-group'):
+            blockBehind.classList.contains('value-container')? 'value-container':
+            blockBehind.classList.contains('block-container')? 'block-container':
+            'unknow'
+        );
+        if(blockBehindType === 'event' || blockBehindType === 'value'){
+            return false;
+        }
+        let blockGrabType = (
+            blockGrab.hasAttribute('block-group') ? blockGrab.getAttribute('block-group'):
+            'unknow'
+        );
+        if(blockBehindType === 'condition' || blockBehindType === 'action'){
+            if(blockGrabType === 'condition' || blockGrabType === 'action')
+                return true;
+            return false;
+        }
+        if(blockBehindType === 'value-container' && blockGrabType === 'value'){
+            return true;
+        }
+        if(blockBehindType === 'block-container'){
+            if(blockGrabType === 'action' || blockGrabType === 'condition')
+                return true;
+            return false;
+        }
         return false;
     }
 
@@ -375,6 +386,14 @@ class Block {
             return;
         }
 
+        console.log('---')
+        console.log(elementBehind)
+        console.log(evnt.target)
+
+        // verify if can be connect (or fill).
+        if(!Block.isCanConnect(elementBehind, evnt.target))
+            return;
+
         // value or block block.
         let isBlockValue = (
             elementBehind.classList.contains('value-container') ? true:
@@ -387,15 +406,9 @@ class Block {
             let blockParent = Block.getBlock(elementBehind);
             if(blockParent === null)
                 return;
-            let blockType = BlockType[evnt.target.getAttribute('block-type')];
-            let isCanBeDrop = (
-                isBlockValue? blockType.isCanBeConnectedToValueContainer():
-                blockType.isCanBeConnected()
-            );
-            if(!isCanBeDrop)
-                return;
 
             // insert clone in value/block-container.
+            let blockType = BlockType[evnt.target.getAttribute('block-type')];
             let block = blockType.cloneElement(evnt.target);
             elementBehind.innerText = '';
             elementBehind.appendChild(block);
@@ -406,16 +419,6 @@ class Block {
 
             return;
         }
-
-        // not allow to connect under a value.
-        if(BlockType[elementBehind.getAttribute('block-type')].isCanBeConnectedToValueContainer())
-            return;
-
-        // verify if can be drop.
-        let targetBlockType = BlockType[evnt.target.getAttribute('block-type')];
-        let isCanBeConnected = targetBlockType.isCanBeConnected();
-        if(!isCanBeConnected)
-            return;
 
         // get (or create) block containers for block list.
         let blockContainer = elementBehind.parentElement;
@@ -434,6 +437,7 @@ class Block {
         }
 
         // move target in the block list.
+        let targetBlockType = BlockType[evnt.target.getAttribute('block-type')];
         let target = targetBlockType.cloneElement(evnt.target);
         blockContainer.insertBefore(target, elementBehind.nextSibling);  // fake insertAfter.
         evnt.target.parentNode.removeChild(evnt.target);
@@ -452,16 +456,50 @@ class BlockStart extends Block {
         let block = super.createElement();
         block.setAttribute('block-group', 'event');
         block.setAttribute('block-type', 'BlockStart');
-        block.innerText = 'start';
-        return block;
-    }
 
-    static isCanBeConnected() {
-        return false;
+        let divLine = block.appendChild(document.createElement('div'));  // line one.
+        divLine.classList.add('block-inner-line', 'show-on-grab');
+
+        let txt = divLine.appendChild(document.createElement('div'));
+        txt.classList.add('show-on-grab', 'can-be-grab-by');
+        txt.innerText = 'start';
+
+        divLine = block.appendChild(document.createElement('div'));  // line two.
+        divLine.classList.add('block-inner-line', 'indent');
+
+        let blockContainer = divLine.appendChild(document.createElement('div'));
+        blockContainer.classList.add('block-container', 'drop-on');
+        blockContainer.innerText = 'action';
+        blockContainer.setAttribute('inner-text', 'action');
+
+        return block;
     }
     
     static getCode(block, indent=''){
-        return `${indent}function start() {\n`;
+        // get actions (block-container).
+        let actionContainer = block.querySelector(':scope > div.block-inner-line:nth-child(2) > div.block-container');
+        let action = '';
+        if(actionContainer.classList.contains('fill-container')){
+            let actionChild = actionContainer.firstChild;
+            if(actionChild.classList.contains('block-list')){
+                Array.prototype.forEach.call(
+                    actionChild.querySelectorAll(':scope > div.block'),
+                    (block) => {
+                        let blockType = block.getAttribute('block-type');
+                        action += BlockType[blockType].getCode(block, indent+Block.getTab(1));
+                    }
+                );
+            }else{  // only one block action.
+                let blockType = actionChild.getAttribute('block-type');
+                action = BlockType[blockType].getCode(actionChild, indent+Block.getTab(1));
+            }
+        }
+
+        return (
+            `${indent}function start() {\n`+
+            `${action}`+
+            `${indent}}\n`
+        );
     }
 }
 BlockType['BlockStart'] = BlockStart;
@@ -634,13 +672,6 @@ BlockType['BlockIf'] = BlockIf;
 class BlockBoolean extends Block {
     constructor(){
         super()
-    }
-
-    static isCanBeConnected() {
-        return false;
-    }
-    static isCanBeConnectedToValueContainer() {
-        return true;
     }
 
     static createElement() {
