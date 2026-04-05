@@ -17,6 +17,7 @@ window.addEventListener('load', () => {
             myBpa.addBlockToMenu(BlockAction);
             myBpa.addBlockToMenu(BlockIf);
             myBpa.addBlockToMenu(BlockBoolean);
+            myBpa.addBlockToMenu(BlockComparator);
 
     });
 
@@ -531,7 +532,7 @@ class BlockAction extends Block {
                 option.setAttribute('selected', 'true');
             }
             option.addEventListener('click', this.#eventOptionClick);
-        })
+        });
 
         return block;
     }
@@ -559,7 +560,7 @@ class BlockAction extends Block {
             (option) => {
                 option.removeAttribute('selected');
             }
-        )
+        );
         evnt.target.setAttribute('selected', 'true');
     }
 
@@ -718,8 +719,133 @@ class BlockBoolean extends Block {
 }
 BlockType['BlockBoolean'] = BlockBoolean;
 
+class BlockComparator extends Block {
+    static comparatorDico = [
+        {value: '1', libele: 'et', code: '&&'},
+        {value: '2', libele: 'ou', code: '||'},
+        {value: '3', libele: 'dif.', code: '!='},
+        {value: '4', libele: '>', code: '>'},
+        {value: '5', libele: '<', code: '<'},
+        {value: '6', libele: '>=', code: '>='},
+        {value: '7', libele: '<=', code: '<='},
+    ];
+
+    constructor(){
+        super()
+    }
+
+    static createElement() {
+        let block = super.createElement();
+        block.setAttribute('block-group', 'value');
+        block.setAttribute('block-type', 'BlockComparator');
+        block.innerText = 'compare';
+
+        // condition left.
+        let condition = block.appendChild(document.createElement('div'));
+        condition.classList.add('value-container', 'drop-on');
+        condition.innerText = 'condition';
+        condition.setAttribute('inner-text', 'condition');
+
+        // add select.
+        let select = block.appendChild(document.createElement('select'));
+        this.comparatorDico.forEach((e, i) => {
+            let option = select.appendChild(document.createElement('option'));
+            option.setAttribute('value', e.value);
+            option.setAttribute('code', e.code);
+            option.innerText = e.libele;
+
+            // selected attribute.
+            if(i === 0){
+                option.setAttribute('selected', 'true');
+            }
+            option.addEventListener('click', this.#eventOptionClick);
+        });
+
+        // condition right.
+        condition = block.appendChild(document.createElement('div'));
+        condition.classList.add('value-container', 'drop-on');
+        condition.innerText = 'condition';
+        condition.setAttribute('inner-text', 'condition');
+
+        return block;
+    }
+    static cloneElement(blockRef) {
+        let block = super.cloneElement(blockRef);
+
+        // clone block container left.
+        let container = blockRef.getElementsByClassName('value-container')[0];
+        let newContainer = block.getElementsByClassName('value-container')[0];
+        let containerFill = Block.cloneContanerContend(container);
+        if(containerFill !== null){
+            newContainer.innerText = '';
+            newContainer.appendChild(containerFill);
+            newContainer.classList.add('fill-container');
+        }
+
+        // copy select value selected.
+        let selectRefValue = blockRef.getElementsByTagName('select')[0].value;
+        Array.prototype.forEach.call(
+            block.getElementsByTagName('option'),
+            (option, i) => {
+                if(i === 0){
+                    option.removeAttribute('selected');
+                }
+                if(option.getAttribute('value') === selectRefValue){
+                    option.setAttribute('selected', 'true');
+                }
+                option.addEventListener('click', this.#eventOptionClick);
+            }
+        );
+
+        // clone block container right.
+        container = blockRef.getElementsByClassName('value-container')[1];
+        newContainer = block.getElementsByClassName('value-container')[1];
+        containerFill = Block.cloneContanerContend(container);
+        if(containerFill !== null){
+            newContainer.innerText = '';
+            newContainer.appendChild(containerFill);
+            newContainer.classList.add('fill-container');
+        }
+
+        return block;
+    }
+
+    static #eventOptionClick(evnt) {
+        Array.prototype.forEach.call(
+            evnt.target.parentElement.getElementsByTagName('option'),
+            (option) => {
+                option.removeAttribute('selected');
+            }
+        )
+        evnt.target.setAttribute('selected', 'true');
+    }
+
+    static getCode(block, indent='') {
+        // get value left.
+        let valueContainer = block.getElementsByClassName('value-container')[0];
+        let valueLeft = 'false';
+        if(valueContainer.classList.contains('fill-container')){
+            let blockType = valueContainer.firstChild.getAttribute('block-type');
+            valueLeft = BlockType[blockType].getCode(valueContainer.firstChild);
+        }
+        
+        // get select value.
+        let comparatorCode = block.getElementsByTagName('select')[0].selectedOptions[0].getAttribute('code');
+
+        // get value right.
+        valueContainer = block.getElementsByClassName('value-container')[1];
+        let valueRight = 'false';
+        if(valueContainer.classList.contains('fill-container')){
+            let blockType = valueContainer.firstChild.getAttribute('block-type');
+            valueRight = BlockType[blockType].getCode(valueContainer.firstChild);
+        }
+
+        return `(${valueLeft} ${comparatorCode} ${valueRight})`;
+    }
+}
+BlockType['BlockComparator'] = BlockComparator;
+
 
 // todo: 
-// !! restrict to connect block into container from the menu.
 // make other block values.
 // make block loop.

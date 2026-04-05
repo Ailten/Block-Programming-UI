@@ -55,13 +55,13 @@ div.block-programming-ui {
         }
 
         & div.value-container {
-            border: 2px dashed rgb(114, 241, 114);
+            border: 2px dashed rgb(68, 185, 68);  /*rgb(114, 241, 114);*/
             border-radius: 5px;
             color: rgb(68, 185, 68);
             padding: 0.5em 1.2em;
         }
         & div.block-container {
-            border: 2px dashed rgb(73, 214, 233);
+            border: 2px dashed rgb(47, 171, 187);  /*rgb(73, 214, 233);*/
             border-radius: 5px;
             color: rgb(47, 171, 187);
             padding: 0.5em 1.2em;
