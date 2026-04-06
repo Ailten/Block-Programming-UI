@@ -82,10 +82,7 @@ class BPA {
         if(!isMouseInCanvasRange)
             return;
 
-        let posY = evnt.clientY - Math.min(blockGrab.clientHeight, 20) * 0.5;  // set pos.
-        let posX = evnt.clientX - Math.min(blockGrab.clientWidth, 90) * 0.5;
-        blockGrab.style.top = `${posY}px`;
-        blockGrab.style.left = `${posX}px`;
+        Block.setPos(blockGrab, evnt.clientX, evnt.clientY);  // set pos.
 
     }
 
@@ -166,6 +163,13 @@ class Block {
                 return dom;
             dom = dom.parentNode;
         }
+    }
+
+    static setPos(dom, mouseX, mouseY) {
+        let posY = mouseY - Math.min(dom.clientHeight, 20) * 0.5;  // set pos.
+        let posX = mouseX - Math.min(dom.clientWidth, 90) * 0.5;
+        dom.style.top = `${posY}px`;
+        dom.style.left = `${posX}px`;
     }
 
     static isCanConnect(blockBehind, blockGrab) {
@@ -262,10 +266,7 @@ class Block {
             let blockType = evnt.target.getAttribute('block-type');
             let block = canvas.appendChild(BlockType[blockType].createElement());
             block.setAttribute('grab-on', 'true');
-            let posY = evnt.y - Math.min(block.clientHeight, 20) * 0.5;  // set pos.
-            let posX = evnt.x - Math.min(block.clientWidth, 90) * 0.5;
-            block.style.top = `${posY}px`;
-            block.style.left = `${posX}px`;
+            Block.setPos(block, evnt.x, evnt.y);  // set pos.
             BlockType[blockType].pointerDown({  // call mousedown event manually.
                 target: block,
                 button: evnt.button,
@@ -288,10 +289,7 @@ class Block {
             let canvas = Block.getCanvas(evnt.target);
             canvas.appendChild(block);
             block.setAttribute('grab-on', 'true');
-            let posY = evnt.y - Math.min(evnt.target.clientHeight, 20) * 0.5;  // set pos.
-            let posX = evnt.x - Math.min(evnt.target.clientWidth, 90) * 0.5;
-            block.style.top = `${posY}px`;
-            block.style.left = `${posX}px`;
+            Block.setPos(block, evnt.x, evnt.y);  // set pos.
 
             evnt.target.parentElement.removeChild(evnt.target);
             container.classList.remove('fill-container');
@@ -314,10 +312,7 @@ class Block {
         let canvas = Block.getCanvas(evnt.target);
         let target = canvas.appendChild(targetType.cloneElement(evnt.target));
         target.setAttribute('grab-on', 'true');
-        let posY = evnt.y - Math.min(target.clientHeight, 20) * 0.5;  // set pos.
-        let posX = evnt.x - Math.min(target.clientWidth, 90) * 0.5;
-        target.style.top = `${posY}px`;
-        target.style.left = `${posX}px`;
+        Block.setPos(target, evnt.x, evnt.y);  // set pos.
 
         // pop one block from a list of two (delete block-list).
         let blockIntoList = Array.from(blockList.querySelectorAll(':scope > div.block'))
@@ -870,7 +865,4 @@ BlockType['BlockWhile'] = BlockWhile;
 
 
 // todo: 
-// (?) generic function for posX, posY.
-// make block break (for loop).
 // make other block values.
-// make block loop.
